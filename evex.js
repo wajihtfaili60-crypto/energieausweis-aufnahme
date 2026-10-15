@@ -164,6 +164,25 @@
     return { ...A, bauteile, huelle, aVe: A.ve > 0 ? huelle / A.ve : null };
   }
 
+  /** Grobe Heizlast (kW) für die Wärmepumpen-Leistung; EVEBI rechnet die genaue Heizlast selbst.
+   *  0,8 × (H_T + H_V) × 30 K liegt bei den Tests knapp über EVEBIs Wert – reicht, damit EVEBI die Leistung nicht als zu niedrig meldet. */
+  function heizlast(p) {
+    const k = kennwerte(p);
+    const fx = { aw: 1, wu: 0.5, we: 0.6, dach: 1, flach: 1, ogd: 0.8, bp: 0.45, kd: 0.5, dbu: 1 };
+    let ht = 0;
+    for (const b of (p.bauteile || [])) {
+      const x = k.bauteile.find(y => y.id === b.id);
+      if (x && x.u) ht += x.u * x.netto * (fx[b.art] || 1);
+      for (const o of (b.oeffnungen || [])) {
+        const f = (p.fenstertypen || []).find(t => t.id === o.fensterId);
+        if (f) ht += zahl(f.uw, 1.3) * zahl(o.breite) * zahl(o.hoehe) * Math.max(1, zahl(o.anzahl, 1));
+      }
+    }
+    ht += k.wbz * k.huelle;
+    const hv = 0.34 * 0.5 * 0.76 * k.ve;
+    return 0.8 * (ht + hv) * 30 / 1000;
+  }
+
   /** Modernisierungsempfehlungen wie EVEBIs Vorschlagsliste: aus U-Werten und Anlagendaten abgeleitet. */
   function empfehlungen(p) {
     const k = kennwerte(p), out = [];
@@ -607,7 +626,9 @@
     const erz = kids(need(eing, "hzErzListe"), "item");
     if (erz[0]) {
       setv(erz[0], "baujahr", bjHz);
-      // Leistung bleibt aus der Vorlage, EVEBI rechnet die Heizlast selbst; Etagenheizung: eine Therme je Wohnung
+      // Kessel/Thermen: Leistung aus der Vorlage (EVEBI rechnet die Heizlast). Wärmepumpe: an die Heizlast angepasst,
+      // sonst meldet EVEBI „Leistung zu niedrig“. Etagenheizung: eine Therme je Wohnung.
+      if (/^wp/.test(hz.preset || "")) setv(erz[0], "Leistung", Math.max(6, Math.ceil(heizlast(p))));
       if (find(erz[0], "anzahlGeraete")) setv(erz[0], "anzahlGeraete", String(hz.preset === "gas_bw_etage" ? kw.we : 1));
     }
     for (const e of erz.slice(1)) setv(e, "baujahr", bjHz);
@@ -694,5 +715,5 @@
     return { bytes: await zip(dateien), dateiname: basis + ".evex", warnungen };
   }
 
-  root.EvexGen = { erzeugeEvex, kennwerte, auto, huelleSoll, empfehlungen, bundeslandAusPlz, uWert, rLuft, BAUTEILARTEN, RICHTUNG };
+  root.EvexGen = { erzeugeEvex, kennwerte, auto, huelleSoll, empfehlungen, heizlast, bundeslandAusPlz, uWert, rLuft, BAUTEILARTEN, RICHTUNG };
 })(typeof window !== "undefined" ? window : globalThis);

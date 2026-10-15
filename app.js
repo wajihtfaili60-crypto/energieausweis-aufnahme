@@ -632,7 +632,7 @@
         <div class="feld"><span class="lbl">Wärmeübergabe</span>${wahl(p, "heizung.uebergabe", [["HZK_HEIZKOERPER", "Heizkörper", P.hk], ["HZK_FLAECHENHZ", "Fußbodenheizung", P.fbh]], { label: "Wärmeübergabe" })}</div>
         <label class="schalter"><span>Hydraulisch abgeglichen<small>mit Nachweis, z. B. nach Heizkörpertausch</small></span><input type="checkbox" data-pfad="heizung.hydr" data-neu="1"${h.hydr ? " checked" : ""}></label>`)}
       ${autoBlock([["Systemtemperatur", h.uebergabe === "HZK_FLAECHENHZ" ? "35/28 °C" : "55/45 °C"], ...(h.preset === "gas_bw_etage" ? [["Thermen", A.we + " (je Wohnung)"]] : []),
-        ["Nennleistung", "rechnet EVEBI"], ["Warmwasser", { gas_bw_zentral_speicher: "Kessel mit Speicher", gas_bw_kombi: "Kombitherme", gas_bw_etage: "über die Thermen", gas_nt_dl: "Gas-Durchlauferhitzer", wp_luft: "über die Wärmepumpe" }[h.preset] || "–"], ["Lüftung", "Fensterlüftung"]],
+        ["Nennleistung", /^wp/.test(h.preset) ? "≈ " + Math.max(6, Math.ceil(G.heizlast(p))) + " kW" : "rechnet EVEBI"], ["Warmwasser", { gas_bw_zentral_speicher: "Kessel mit Speicher", gas_bw_kombi: "Kombitherme", gas_bw_etage: "über die Thermen", gas_nt_dl: "Gas-Durchlauferhitzer", wp_luft: "über die Wärmepumpe" }[h.preset] || "–"], ["Lüftung", "Fensterlüftung"]],
         "Eine Lüftungsanlage stellst du bei Bedarf in EVEBI unter „Belüftung“ ein.")}
       ${weiterKnopf(p, "heizung")}`;
   }
