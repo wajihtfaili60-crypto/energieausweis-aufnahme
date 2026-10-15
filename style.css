@@ -41,7 +41,10 @@
 
 * { box-sizing: border-box; }
 html, body { height: 100%; }
-body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.45 var(--schrift); -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.45 var(--schrift); -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; overscroll-behavior-y: none; }
+a, button, label, summary, select { touch-action: manipulation; }
+input, select, textarea { font-size: max(16px, 1em); }   /* iPhone zoomt sonst beim Antippen hinein */
+button, .kachel, .zeile, .projekt, .option, .chips button { -webkit-user-select: none; user-select: none; }
 button, input, select, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; }
 :focus-visible { outline: 3px solid color-mix(in srgb, var(--stift) 55%, transparent); outline-offset: 2px; }
@@ -64,6 +67,7 @@ h1, h2, h3 { text-wrap: balance; }
 .logo svg { width: 22px; height: 22px; }
 
 main { max-width: 720px; margin: 0 auto; padding: 0 16px calc(env(safe-area-inset-bottom, 0px) + 40px); display: grid; gap: 14px; }
+body.mit-leiste main { padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 96px); }
 
 /* Hero unter der Kopfzone */
 .hero { background: linear-gradient(180deg, var(--tief) 0, var(--tief-2) 100%); color: #fff; margin: 0 -16px; padding: 6px 16px 18px; display: grid; gap: 14px; }
@@ -181,9 +185,9 @@ textarea:focus { border-color: var(--stift); outline: none; background: var(--ka
 .schicht { display: grid; grid-template-columns: 26px minmax(0, 1fr) 92px 34px; gap: 8px; align-items: center; }
 .schicht .farbe { width: 26px; height: 38px; border-radius: 6px; }
 .schicht .eingabe input { padding: 10px; font-size: 16px; }
-.schicht .eingabe select { padding: 10px 30px 10px 10px; font-size: 15px; }
-.schicht .lam { grid-column: 2 / 4; font-size: 12px; color: var(--muted); margin-top: -4px; display: flex; gap: 6px; align-items: center; }
-.schicht .lam input { width: 70px; border: 0; border-bottom: 1px dashed var(--linie); background: transparent; font-size: 13px; text-align: right; padding: 2px; }
+.schicht .eingabe select { padding: 10px 30px 10px 10px; font-size: 16px; }
+.schicht .lam { grid-column: 2 / 4; font-size: 13px; color: var(--muted); margin-top: -4px; display: flex; gap: 6px; align-items: center; }
+.schicht .lam input { width: 76px; border: 0; border-bottom: 1px dashed var(--linie); background: transparent; font-size: 16px; text-align: right; padding: 2px; }
 
 /* Öffnungen: Typ über die volle Breite, darunter Breite × Höhe, Anzahl */
 .oeff { display: grid; grid-template-columns: minmax(0, 1fr) 12px minmax(0, 1fr) 74px 34px; gap: 6px; align-items: center; padding: 10px; border-radius: 12px; background: var(--karte-2); }
@@ -205,6 +209,12 @@ textarea:focus { border-color: var(--stift); outline: none; background: var(--ka
 .icon-knopf svg { width: 16px; height: 16px; }
 .reihe { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .weiter { display: flex; justify-content: flex-end; }
+/* Feste Leiste unten wie in einer App: Übersicht + nächster Schritt */
+.fussleiste { position: fixed; left: 0; right: 0; bottom: 0; z-index: 15; display: flex; gap: 8px; justify-content: center;
+  padding: 10px 16px calc(env(safe-area-inset-bottom, 0px) + 10px); background: color-mix(in srgb, var(--karte) 92%, transparent);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border-top: 1px solid var(--linie); }
+.fussleiste .knopf { flex: 1; max-width: 340px; min-height: 50px; }
+.fussleiste .knopf.zurueck { flex: 0 0 auto; padding: 10px 14px; }
 
 /* Vorlagen-Chips */
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }

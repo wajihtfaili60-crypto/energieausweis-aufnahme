@@ -27,6 +27,7 @@
     weg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></svg>',
     hoch: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 14l6-6 6 6"/></svg>',
     kopie: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M4 16V4h12"/></svg>',
+    raster: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>',
     pfeil: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
     export: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 3v12M7 10l5 5 5-5M4 19h16"/></svg>',
     teilen: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4"/></svg>',
@@ -249,11 +250,14 @@
     const k = f <= 1 ? "a" : f <= 1.5 ? "b" : f <= 2.5 ? "c" : f <= 4 ? "d" : "e";
     return `<span class="upill k-${k}">U ${de(u, 2)}</span>`;
   }
+  /** Feste Leiste unten: zurück zur Übersicht und direkt zum nächsten Schritt. */
   function weiterKnopf(p, key) {
     const i = SCHRITTE.findIndex(s => s.key === key), n = SCHRITTE[i + 1];
-    return n ? `<div class="weiter"><a class="knopf dunkel" href="#/p/${p.id}/${n.key}">Weiter: ${esc(n.titel)} ${I.pfeil}</a></div>`
-      : `<div class="weiter"><a class="knopf dunkel" href="#/p/${p.id}/export">Weiter: EVEBI-Datei ${I.pfeil}</a></div>`;
+    const ziel = n ? [`#/p/${p.id}/${n.key}`, n.titel] : [`#/p/${p.id}/export`, "EVEBI-Datei"];
+    return leiste(`<a class="knopf zurueck" href="#/p/${p.id}" aria-label="Zur Übersicht">${I.raster}</a>
+      <a class="knopf dunkel" href="${ziel[0]}">${esc(ziel[1])} ${I.pfeil}</a>`);
   }
+  const leiste = inhalt => `<nav class="fussleiste" aria-label="Navigation">${inhalt}</nav>`;
 
   // ------------------------------------------------------------ Prüfung & Schritte
   function pruefen(p) {
@@ -319,6 +323,7 @@
       else if (r[2] === "export") seiteExport(p);
       else { const s = SCHRITTE.find(x => x.key === r[2]); if (s) s.seite(p); else { location.hash = "#/p/" + p.id; return; } }
     } else { aktuell = null; seiteStart(); }
+    document.body.classList.toggle("mit-leiste", !!app.querySelector(".fussleiste"));
     window.scrollTo(0, oben ? 0 : y);
   }
   function kopf(titel, unter, zurueck) {
@@ -525,7 +530,7 @@
         <p class="hinweis">Für Holzanteile (Sparren, Balken) oder bekannte Herstellerwerte.</p></details>
       <div class="reihe"><button class="knopf klein" data-aktion="konstr-kopieren">${I.kopie} Kopieren</button>
         <button class="knopf klein gefahr" data-aktion="konstr-weg">${I.weg} Löschen</button>
-        <a class="knopf dunkel klein" href="#/p/${p.id}/aufbauten" style="margin-left:auto">Fertig</a></div>`;
+</div>${leiste(`<a class="knopf dunkel" href="#/p/${p.id}/aufbauten">Fertig ${I.pfeil}</a>`)}`;
   }
 
   // ------------------------------------------------------------ 5 Fenster & Türen
@@ -552,7 +557,7 @@
         ${auswahlFeld(p, "Rahmen", pf + ".rahmen", RAHMEN)}${feld(p, "Einbaujahr", pf + ".baujahr", { zahl: true })}</div>
         <p class="hinweis">Uw und g aus Rechnung oder Datenblatt – sonst bleiben die Richtwerte der Vorlage.</p>`)}
       <div class="reihe"><button class="knopf klein gefahr" data-aktion="fenster-weg">${I.weg} Löschen</button>
-        <a class="knopf dunkel klein" href="#/p/${p.id}/fenster" style="margin-left:auto">Fertig</a></div>`;
+</div>${leiste(`<a class="knopf dunkel" href="#/p/${p.id}/fenster">Fertig ${I.pfeil}</a>`)}`;
   }
 
   // ------------------------------------------------------------ 6 Hülle
@@ -616,7 +621,7 @@
         ${feld(p, "Bruttofläche selbst eingeben", pf + ".flaecheManuell", { zahl: true, einheit: "m²", platz: "leer = aus den Maßen" })}
         <p class="hinweis">Zum Beispiel bei Vor- und Rücksprüngen. Leer lassen, um wieder aus den Maßen zu rechnen.</p></details>`
       : `<div class="reihe"><button class="knopf klein" data-aktion="bauteil-kopieren">${I.kopie} Kopieren</button><button class="knopf klein gefahr" data-aktion="bauteil-weg">${I.weg} Löschen</button></div>`}
-      <div class="weiter"><a class="knopf dunkel" href="#/p/${p.id}/huelle">Fertig ${I.pfeil}</a></div>`;
+      ${leiste(`<a class="knopf dunkel" href="#/p/${p.id}/huelle">Fertig ${I.pfeil}</a>`)}`;
   }
 
   // ------------------------------------------------------------ 7 Heizung
