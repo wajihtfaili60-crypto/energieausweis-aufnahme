@@ -11,18 +11,25 @@
 
   // ------------------------------------------------------------ Fachtabellen
   const BAUTEILARTEN = {
-    aw:    { label: "Außenwand gegen Außenluft",          btl: "WAND",   ueb: "UEB_W_AUSSEN",      konstr: "wand",  rsi: 0.13, rse: 0.04, flaeche: "tfl", neig: 90 },
-    wu:    { label: "Wand gegen unbeheizten Raum",         btl: "WAND",   ueb: "UEB_W_UNBEHEIZT",   konstr: "wand",  rsi: 0.13, rse: 0.13, flaeche: "tfl", neig: 90 },
-    we:    { label: "Wand gegen Erdreich",                 btl: "WAND",   ueb: "UEB_W_ERDREICH",    konstr: "wand",  rsi: 0.13, rse: 0.00, flaeche: "tfl", neig: 90 },
-    dach:  { label: "Dachfläche (beheiztes Dach)",         btl: "DACH",   ueb: "UEB_D_AUSSEN",      konstr: "dach",  rsi: 0.10, rse: 0.04, flaeche: "man", neig: 45 },
-    flach: { label: "Flachdach",                           btl: "DACH",   ueb: "UEB_D_AUSSEN",      konstr: "dach",  rsi: 0.10, rse: 0.04, flaeche: "man", neig: 0 },
-    ogd:   { label: "Oberste Geschossdecke zum unbeheizten Dachraum", btl: "DACH", ueb: "UEB_D_NAUSG_DACH", konstr: "dach", rsi: 0.10, rse: 0.10, flaeche: "man", neig: 0 },
-    bp:    { label: "Bodenplatte auf Erdreich",            btl: "KELLER", ueb: "UEB_K_BP_OHNE_RD",  konstr: "boden", rsi: 0.17, rse: 0.00, flaeche: "man", neig: 0, boden: true },
-    kd:    { label: "Kellerdecke zum unbeheizten Keller",  btl: "KELLER", ueb: "UEB_K_KELLER_OPM",  konstr: "boden", rsi: 0.17, rse: 0.17, flaeche: "man", neig: 0, boden: true },
-    dbu:   { label: "Decke nach unten gegen Außenluft",    btl: "KELLER", ueb: "UEB_K_AUSSEN",      konstr: "boden", rsi: 0.17, rse: 0.04, flaeche: "man", neig: 0, boden: true },
+    aw:    { label: "Außenwand",                         gruppe: "wand",  btl: "WAND",   ueb: "UEB_W_AUSSEN",      konstr: "wand",  rsi: 0.13, rse: 0.04, flaeche: "tfl", neig: 90, gegWert: 0.24 },
+    wu:    { label: "Wand zu unbeheiztem Raum",          gruppe: "wand",  btl: "WAND",   ueb: "UEB_W_UNBEHEIZT",   konstr: "wand",  rsi: 0.13, rse: 0.13, flaeche: "tfl", neig: 90, gegWert: 0.30 },
+    we:    { label: "Kellerwand gegen Erdreich",         gruppe: "wand",  btl: "WAND",   ueb: "UEB_W_ERDREICH",    konstr: "wand",  rsi: 0.13, rse: 0.00, flaeche: "tfl", neig: 90, gegWert: 0.30 },
+    dach:  { label: "Dachfläche",                        gruppe: "dach",  btl: "DACH",   ueb: "UEB_D_AUSSEN",      konstr: "dach",  rsi: 0.10, rse: 0.04, flaeche: "man", neig: 45, gegWert: 0.24 },
+    flach: { label: "Flachdach",                         gruppe: "dach",  btl: "DACH",   ueb: "UEB_D_AUSSEN",      konstr: "dach",  rsi: 0.10, rse: 0.04, flaeche: "man", neig: 0,  gegWert: 0.20 },
+    ogd:   { label: "Oberste Geschossdecke",             gruppe: "dach",  btl: "DACH",   ueb: "UEB_D_NAUSG_DACH",  konstr: "dach",  rsi: 0.10, rse: 0.10, flaeche: "man", neig: 0,  gegWert: 0.24 },
+    bp:    { label: "Bodenplatte",                       gruppe: "boden", btl: "KELLER", ueb: "UEB_K_BP_OHNE_RD",  konstr: "boden", rsi: 0.17, rse: 0.00, flaeche: "man", neig: 0,  gegWert: 0.30, boden: true },
+    kd:    { label: "Kellerdecke",                       gruppe: "boden", btl: "KELLER", ueb: "UEB_K_KELLER_OPM",  konstr: "boden", rsi: 0.17, rse: 0.17, flaeche: "man", neig: 0,  gegWert: 0.30, boden: true },
+    dbu:   { label: "Decke über Außenluft",              gruppe: "boden", btl: "KELLER", ueb: "UEB_K_AUSSEN",      konstr: "boden", rsi: 0.17, rse: 0.04, flaeche: "man", neig: 0,  gegWert: 0.24, boden: true },
   };
   const KONSTR_PROTO = { wand: "WAND", dach: "DACH", boden: "KELLER" };
   const BTL_ART = { WAND: "BTL_WAND", DACH: "BTL_DACH", KELLER: "BTL_KELLER", FENSTER: "BTL_FENSTER" };
+  const RICHTUNG = { 0: "Nord", 45: "Nordost", 90: "Ost", 135: "Südost", 180: "Süd", 225: "Südwest", 270: "West", 315: "Nordwest" };
+  const norm = g => ((Math.round(g) % 360) + 360) % 360;
+
+  function zahl(x, d = 0) {
+    const v = typeof x === "string" ? Number(x.replace(/\s/g, "").replace(",", ".")) : Number(x);
+    return x === "" || x == null ? d : (Number.isFinite(v) ? v : d);
+  }
 
   /** Wärmedurchlasswiderstand ruhender Luftschichten (DIN EN ISO 6946, horizontal). */
   function rLuft(dickeCm) {
@@ -52,17 +59,99 @@
     return r > 0 ? 1 / r : null;
   }
 
-  function zahl(x, d = 0) {
-    const v = typeof x === "string" ? Number(x.replace(",", ".")) : Number(x);
-    return Number.isFinite(v) ? v : d;
+  // ---- Bundesland aus der PLZ (Leitregion + bekannte Grenzbereiche; in der App änderbar)
+  const BL_2 = { "01": "SN", "02": "SN", "03": "BB", "04": "SN", "06": "ST", "07": "TH", "08": "SN", "09": "SN", "10": "BE", "12": "BE", "13": "BE",
+    "14": "BB", "15": "BB", "16": "BB", "17": "MV", "18": "MV", "19": "MV", "20": "HH", "21": "NI", "22": "HH", "23": "SH", "24": "SH", "25": "SH",
+    "26": "NI", "27": "NI", "28": "HB", "29": "NI", "30": "NI", "31": "NI", "32": "NW", "33": "NW", "34": "HE", "35": "HE", "36": "HE", "37": "NI",
+    "38": "NI", "39": "ST", "40": "NW", "41": "NW", "42": "NW", "44": "NW", "45": "NW", "46": "NW", "47": "NW", "48": "NW", "49": "NI", "50": "NW",
+    "51": "NW", "52": "NW", "53": "NW", "54": "RP", "55": "RP", "56": "RP", "57": "NW", "58": "NW", "59": "NW", "60": "HE", "61": "HE", "63": "HE",
+    "64": "HE", "65": "HE", "66": "SL", "67": "RP", "68": "BW", "69": "BW", "70": "BW", "71": "BW", "72": "BW", "73": "BW", "74": "BW", "75": "BW",
+    "76": "BW", "77": "BW", "78": "BW", "79": "BW", "80": "BY", "81": "BY", "82": "BY", "83": "BY", "84": "BY", "85": "BY", "86": "BY", "87": "BY",
+    "88": "BW", "89": "BW", "90": "BY", "91": "BY", "92": "BY", "93": "BY", "94": "BY", "95": "BY", "96": "BY", "97": "BY", "98": "TH", "99": "TH" };
+  const BL_AUSNAHMEN = [[4600, 4639, "TH"], [4895, 4938, "BB"], [6556, 6578, "TH"], [7919, 7985, "SN"], [17258, 17337, "BB"], [19300, 19357, "BB"],
+    [21029, 21149, "HH"], [21465, 21521, "SH"], [22844, 22885, "SH"], [22926, 22969, "SH"], [23919, 23999, "MV"], [27568, 27580, "HB"],
+    [28790, 28879, "NI"], [34346, 34355, "NI"], [36404, 36469, "TH"], [37213, 37299, "HE"], [37308, 37359, "TH"], [38820, 38899, "ST"],
+    [48455, 48531, "NI"], [49477, 49549, "NW"], [53424, 53579, "RP"], [57518, 57648, "RP"], [63739, 63939, "BY"], [65558, 65629, "RP"],
+    [66482, 66509, "RP"], [66849, 66999, "RP"], [68519, 68649, "HE"], [69479, 69518, "HE"], [88099, 88179, "BY"], [89231, 89359, "BY"], [97877, 97999, "BW"]];
+  function bundeslandAusPlz(plz) {
+    const s = String(plz || "").replace(/\D/g, "");
+    if (s.length !== 5) return null;
+    const n = Number(s);
+    for (const [a, b, bl] of BL_AUSNAHMEN) if (n >= a && n <= b) return "BL_" + bl;
+    return BL_2[s.slice(0, 2)] ? "BL_" + BL_2[s.slice(0, 2)] : null;
+  }
+
+  /** Alle Werte, die EVEBI selbst ermittelt („A“) – hier aus den wenigen Eingaben abgeleitet. */
+  function auto(p) {
+    const a = p.allg || {}, g = p.geo || {};
+    const L = zahl(g.laenge), B = zahl(g.breite), H = zahl(g.hoehe);
+    const dachBeh = a.dach === "DK_DACH_BEH" || a.dach === "DK_DACH_TEILW_BEH";
+    const kellerBeh = a.keller === "KK_KELLER_BEH";
+    const alpha = zahl(g.dachneigung, 40) * Math.PI / 180;
+    const hk = kellerBeh ? zahl(g.kellerhoehe, 2.5) : 0;
+    const geschosse = Math.max(1, Math.round(zahl(a.geschosse, 1)));
+    const vollgeschosse = Math.max(1, geschosse - (dachBeh ? 1 : 0) - (kellerBeh ? 1 : 0));   // ohne ausgebautes Dach und Keller
+    const dachVolumen = dachBeh ? L * B * B * Math.tan(alpha) / 4 : 0;
+    const ve = zahl(g.veManuell) > 0 ? zahl(g.veManuell) : L * B * H + dachVolumen + L * B * hk;
+    const geschosshoehe = H > 0 ? (H + hk) / (vollgeschosse + (kellerBeh ? 1 : 0)) : 0;
+    const anFaktor = !geschosshoehe || (geschosshoehe >= 2.5 && geschosshoehe <= 3.0) ? 0.32 : (1 / geschosshoehe - 0.04);
+    const wfl = zahl(a.wfl);
+    const we = Math.max(1, Math.round(zahl(a.we, 1)));
+    return {
+      L, B, H, alpha, dachBeh, kellerBeh, hk, geschosse, vollgeschosse, dachVolumen, ve, geschosshoehe: geschosshoehe || 2.75,
+      an: anFaktor * ve, anFaktor, raumhoehe: 2.5, we, weSelbst: we === 1 ? 1 : 0, wfl, personen: Math.max(1, Math.round(wfl / 40)), wbz: 0.1,
+      bundesland: (p.objekt || {}).bundesland || bundeslandAusPlz((p.objekt || {}).plz) || "BL_NI",
+    };
+  }
+
+  /**
+   * Soll-Hülle aus Länge (Traufseite), Breite (Giebelseite), Wandhöhe, Gebäudeart, Keller und Dach.
+   * Jedes Bauteil hat einen festen Schlüssel; die App gleicht darüber ab und behält Fenster und Aufbauten.
+   */
+  function huelleSoll(p) {
+    const A = auto(p), a = p.allg || {}, g = p.geo || {};
+    const { L, B, H } = A;
+    if (!(L > 0 && B > 0 && H > 0)) return [];
+    const vorne = norm(zahl(g.vorne, 180));
+    const art = a.gebaeudeArt || "GEBV_FREISTEHEND";
+    const nachbar = g.nachbar === "links" ? "links" : "rechts";
+    const giebelDreieck = A.dachBeh ? B * B * Math.tan(A.alpha) / 4 : 0;
+    const giebel = [["links", norm(vorne + 90)], ["rechts", norm(vorne - 90)]];   // von vorne gesehen (Blick auf die Fassade)
+    const angebaut = seite => art === "GEBV_REIHENBEBAUUNG" || (art === "GEBV_ANGEBAUT" && seite === nachbar);
+    const soll = [
+      { key: "aw-vorne", art: "aw", name: `Außenwand vorne (${RICHTUNG[vorne]})`, orient: vorne, laenge: L, hoehe: H },
+      { key: "aw-hinten", art: "aw", name: `Außenwand hinten (${RICHTUNG[norm(vorne + 180)]})`, orient: norm(vorne + 180), laenge: L, hoehe: H },
+    ];
+    for (const [seite, o] of giebel) {
+      if (angebaut(seite)) continue;
+      soll.push({ key: "aw-giebel-" + seite, art: "aw", name: `Giebelwand ${seite} (${RICHTUNG[o]})`, orient: o, laenge: B, hoehe: H,
+        flaeche: giebelDreieck ? B * H + giebelDreieck : 0 });
+    }
+    if (A.dachBeh) {
+      const sparren = (B / 2) / Math.cos(A.alpha);
+      const neig = zahl(g.dachneigung, 40);
+      soll.push({ key: "dach-vorne", art: "dach", name: `Dachfläche vorne (${RICHTUNG[vorne]})`, orient: vorne, neigung: neig, laenge: L, hoehe: sparren });
+      soll.push({ key: "dach-hinten", art: "dach", name: `Dachfläche hinten (${RICHTUNG[norm(vorne + 180)]})`, orient: norm(vorne + 180), neigung: neig, laenge: L, hoehe: sparren });
+    } else if (a.dach === "DK_FLACHDACH") {
+      soll.push({ key: "flach", art: "flach", name: "Flachdach", laenge: L, hoehe: B });
+    } else {
+      soll.push({ key: "ogd", art: "ogd", name: "Oberste Geschossdecke", laenge: L, hoehe: B });
+    }
+    if (A.kellerBeh) {
+      soll.push({ key: "bp", art: "bp", name: "Bodenplatte Keller", laenge: L, hoehe: B });
+      const umfang = [["vorne", L, vorne], ["hinten", L, norm(vorne + 180)], ...giebel.filter(([s]) => !angebaut(s)).map(([s, o]) => [s, B, o])];
+      for (const [seite, l, o] of umfang) soll.push({ key: "we-" + seite, art: "we", name: `Kellerwand ${seite} (${RICHTUNG[o]})`, orient: o, laenge: l, hoehe: A.hk });
+    } else if (a.keller === "KK_KELLER_UNBEH" || a.keller === "KK_KELLER_TEILW_BEH") {
+      soll.push({ key: "kd", art: "kd", name: "Kellerdecke", laenge: L, hoehe: B });
+    } else {
+      soll.push({ key: "bp", art: "bp", name: "Bodenplatte", laenge: L, hoehe: B });
+    }
+    return soll;
   }
 
   /** Brutto-/Netto-Flächen aller Bauteile und Kennwerte – für Anzeige und Export. */
   function kennwerte(p) {
-    const geo = p.geo || {};
-    const L = zahl(geo.laenge), B = zahl(geo.breite), H = zahl(geo.hoehe);
-    const ve = zahl(geo.veManuell) > 0 ? zahl(geo.veManuell) : L * B * H;
-    const an = 0.32 * ve;
+    const A = auto(p);
     const bauteile = (p.bauteile || []).map(bt => {
       const art = BAUTEILARTEN[bt.art] || BAUTEILARTEN.aw;
       const brutto = zahl(bt.flaeche) > 0 ? zahl(bt.flaeche) : zahl(bt.laenge) * zahl(bt.hoehe);
@@ -70,25 +159,58 @@
       const konstr = (p.konstruktionen || []).find(k => k.id === bt.konstrId);
       return { id: bt.id, art, brutto, oeff, netto: Math.max(0, brutto - oeff), u: uWert(konstr, bt.art) };
     });
-    let ht = 0, a = 0, fehlt = false;
-    const wbz = zahl((p.allg || {}).wbz, 0.1);
-    for (const bt of (p.bauteile || [])) {
-      const k = bauteile.find(x => x.id === bt.id);
-      a += k.netto;
-      if (k.u == null) fehlt = true; else ht += k.u * k.netto * fx(bt.art);
-      for (const o of (bt.oeffnungen || [])) {
-        const f = (p.fenstertypen || []).find(x => x.id === o.fensterId);
-        const fl = zahl(o.breite) * zahl(o.hoehe) * Math.max(1, zahl(o.anzahl, 1));
-        a += fl;
-        if (!f || !zahl(f.uw)) fehlt = true; else ht += zahl(f.uw) * fl;
-      }
-    }
-    ht += wbz * a;
-    return { ve, an, bauteile, huelle: a, htStrich: a > 0 ? ht / a : null, unvollstaendig: fehlt, aVe: ve > 0 ? a / ve : null };
+    let huelle = 0;
+    for (const b of bauteile) huelle += b.netto + b.oeff;
+    return { ...A, bauteile, huelle, aVe: A.ve > 0 ? huelle / A.ve : null };
   }
-  // Temperatur-Korrekturfaktoren nur für die Vorschau (EVEBI rechnet selbst genau)
-  function fx(art) {
-    return { aw: 1, wu: 0.5, we: 0.6, dach: 1, flach: 1, ogd: 0.8, bp: 0.6, kd: 0.6, dbu: 1 }[art] || 1;
+
+  /** Modernisierungsempfehlungen wie EVEBIs Vorschlagsliste: aus U-Werten und Anlagendaten abgeleitet. */
+  function empfehlungen(p) {
+    const k = kennwerte(p), out = [];
+    const schlechtester = gruppe => {
+      let best = null;
+      for (const b of (p.bauteile || [])) {
+        const x = k.bauteile.find(y => y.id === b.id);
+        if (!x || x.u == null || x.art.gruppe !== gruppe) continue;
+        const faktor = x.u / x.art.gegWert;
+        if (!best || faktor > best.faktor) best = { b, x, faktor };
+      }
+      return best;
+    };
+    const w = schlechtester("wand");
+    if (w && w.faktor > 1.5) {
+      const konstr = (p.konstruktionen || []).find(c => c.id === w.b.konstrId);
+      const hohlschicht = konstr && konstr.schichten.some(s => s.luft && zahl(s.dicke) >= 4);
+      out.push(hohlschicht
+        ? { key: "aw-kern", anlagenteil: "Außenwand gg. Außenluft", text: "Kerndämmung der Luftschicht im zweischaligen Mauerwerk (Einblasdämmung)", paket: true }
+        : { key: "aw-wdvs", anlagenteil: "Außenwand gg. Außenluft", text: "Dämmung der Außenwände gemäß gültiger Verordnung, 14–16 cm", paket: true });
+    }
+    const d = schlechtester("dach");
+    if (d && d.faktor > 1.5) {
+      out.push(d.b.art === "ogd"
+        ? { key: "ogd", anlagenteil: "Oberste Geschossdecke", text: "Dämmung der obersten Geschossdecke gemäß gültiger Verordnung, 16–20 cm", paket: true }
+        : { key: "dach", anlagenteil: "Dach", text: "Dämmung der Dachflächen gemäß gültiger Verordnung", paket: true });
+    }
+    const f = schlechtester("boden");
+    if (f && f.faktor > 1.5) {
+      out.push(f.b.art === "kd"
+        ? { key: "kd", anlagenteil: "Kellerdecke", text: "Dämmung der Kellerdecke von unten, 10–12 cm", paket: true }
+        : { key: "bp", anlagenteil: "Fußboden", text: "Dämmung des Fußbodens zum Erdreich bei Erneuerung des Fußbodenaufbaus", paket: false });
+    }
+    let fensterSchlecht = false;
+    for (const b of (p.bauteile || [])) for (const o of (b.oeffnungen || [])) {
+      const t = (p.fenstertypen || []).find(x => x.id === o.fensterId);
+      if (t && t.art !== "FART_AUSSENTUER" && zahl(t.uw) > 1.6) fensterSchlecht = true;
+    }
+    if (fensterSchlecht) out.push({ key: "fenster", anlagenteil: "Fenster", text: "Austausch der Fenster gemäß gültiger Verordnung, Uw ≤ 0,95 W/(m²K)", paket: true });
+    const hz = p.heizung || {};
+    if (!hz.hydr) out.push({ key: "hydr", anlagenteil: "Heizung", text: "Hydraulischer Abgleich und Optimierung der Regelungstechnik", paket: false });
+    const alter = new Date().getFullYear() - zahl(hz.baujahr, new Date().getFullYear());
+    if (hz.preset && !/^wp/.test(hz.preset) && (alter >= 20 || hz.preset === "gas_nt_dl")) {
+      out.push({ key: "erzeuger", anlagenteil: "Heizung", text: "Erneuerung des Wärmeerzeugers, z. B. durch eine Wärmepumpe", paket: false });
+    }
+    const aus = new Set(((p.ea || {}).aus) || []);
+    return out.map(e => ({ ...e, aktiv: !aus.has(e.key) }));
   }
 
   // ------------------------------------------------------------ XML-Helfer
@@ -276,9 +398,12 @@
     const heute = new Date().toISOString().slice(0, 10);
     const allg = p.allg || {}, geo = p.geo || {}, obj = p.objekt || {}, ku = p.kunde || {}, ea = p.ea || {};
     const kw = kennwerte(p);
-    const datum = ea.datum || heute;
+    const datum = ea.datum || heute;                       // EVEBI: Ausstellungsdatum = Tag der Erstellung
     const baujahr = String(zahl(allg.baujahr) || "");
-    const wfl = zahl(allg.wfl);
+    const wfl = kw.wfl;
+    // Kunde: ein Namensfeld in der App, Adresse wie Objekt, solange nichts anderes eingetragen ist
+    const kName = String(ku.name || [ku.vorname, ku.nachname].filter(Boolean).join(" ")).trim();
+    const kAdr = ku.andereAdresse ? ku : obj;
 
     // ---- Kopfdaten
     const ort = [obj.ort, [obj.strasse, obj.hausnr].filter(Boolean).join(" ")].filter(Boolean).join(", ");
@@ -286,13 +411,13 @@
     const oa = need(hdr, "objektAdr");
     for (const [k, v] of [["Plz", obj.plz], ["Ort", obj.ort], ["Strasse", obj.strasse], ["Hausnr", obj.hausnr]]) setv(oa, k, v || "");
     const ka = need(hdr, "kundenAdr");
-    for (const [k, v] of [["Anrede", ku.anrede], ["Vorname", ku.vorname], ["Nachname", ku.nachname], ["Plz", ku.plz],
-      ["Ort", ku.ort], ["Strasse", ku.strasse], ["Hausnr", ku.hausnr], ["Telefon", ku.telefon], ["eMail", ku.email]]) {
+    for (const [k, v] of [["Anrede", ku.anrede], ["Vorname", ""], ["Nachname", kName], ["Plz", kAdr.plz],
+      ["Ort", kAdr.ort], ["Strasse", kAdr.strasse], ["Hausnr", kAdr.hausnr], ["Telefon", ku.telefon], ["eMail", ku.email]]) {
       if (find(ka, k)) setv(ka, k, v || "");
     }
     if (find(ka, "Briefanrede")) {
-      const br = ku.nachname ? `Sehr geehrte${ku.anrede === "Herr" ? "r Herr" : ku.anrede === "Frau" ? " Frau" : " Damen und Herren"}${ku.anrede === "Herr" || ku.anrede === "Frau" ? " " + ku.nachname : ""},` : "Sehr geehrte Damen und Herren,";
-      setv(ka, "Briefanrede", br);
+      const nach = kName.split(" ").pop();
+      setv(ka, "Briefanrede", ku.anrede === "Herr" && nach ? `Sehr geehrter Herr ${nach},` : ku.anrede === "Frau" && nach ? `Sehr geehrte Frau ${nach},` : "Sehr geehrte Damen und Herren,");
     }
     const pa = need(hdr, "planerAdr");
     const au = aussteller || {};
@@ -303,30 +428,31 @@
     }
     if (find(pa, "Briefanrede") && au.nachname) setv(pa, "Briefanrede", `Sehr geehrte${au.anrede === "Frau" ? " Frau" : "r Herr"} ${au.nachname},`);
 
-    const L = zahl(geo.laenge), B = zahl(geo.breite);
-    const hoehe = L * B > 0 ? kw.ve / (L * B) : zahl(geo.hoehe);
+    const L = kw.L, B = kw.B;
+    const hoehe = L * B > 0 ? kw.ve / (L * B) : kw.H;
     for (const [k, v] of [
       ["baujahr", baujahr], ["rechtsstand", datum], ["L_G", L], ["B_G", B],
-      ["geschosse", String(zahl(allg.geschosse, 1))], ["vollgeschosse", String(zahl(allg.vollgeschosse, 1))],
-      ["we", String(zahl(allg.we, 1))], ["we_selbstgenutzt", String(zahl(allg.weSelbst, 0))],
-      ["personen", String(zahl(allg.personen, 0))], ["wfl", wfl], ["beheiztNRF", Math.round(wfl * 110) / 100],
+      ["geschosse", String(kw.geschosse)], ["vollgeschosse", String(kw.vollgeschosse)],
+      ["we", String(kw.we)], ["we_selbstgenutzt", String(kw.weSelbst)],
+      ["personen", String(kw.personen)], ["beheiztNRF", Math.round(wfl * 110) / 100],
       ["A_NGF_mitbeheizt", Math.round(wfl * 55) / 100], ["BRI", kw.ve], ["Ve", kw.ve],
-      ["raumHoehe", zahl(geo.raumhoehe, 2.5)], ["dachKurz", allg.dach || "DK_DACH_UNBEH"],
+      ["raumHoehe", kw.raumhoehe], ["dachKurz", allg.dach || "DK_DACH_UNBEH"],
       ["kellerKurz", allg.keller || "KK_KEINKELLER"], ["gebaeudeArt", allg.gebaeudeArt || "GEBV_FREISTEHEND"],
-      ["bundesland", obj.bundesland || "BL_NI"], ["enevRegistriernummer", ""], ["eaKontrolldatei", "DKD_NONE"],
+      ["bundesland", kw.bundesland], ["enevRegistriernummer", ""], ["eaKontrolldatei", "DKD_NONE"],
       ["kfwDatumFoerderAntrag", datum], ["bafaDatumFoerderAntrag", datum],
-      ["datenErfasserEigentuemer", ea.datenEigentuemer ? "true" : "false"], ["datenErfasserAussteller", "true"],
+      ["datenErfasserEigentuemer", "false"], ["datenErfasserAussteller", "true"],
     ]) setv(hdr, k, v);
+    setauto(hdr, "wfl", wfl);                              // EVEBI: beheizte Fläche = Summe der Zonenflächen
 
     // ---- Zone
-    setv(zone, "geschossHoehe", zahl(geo.geschosshoehe, 2.75));
-    setv(zone, "personen", String(zahl(allg.personen, 0) || Math.max(1, Math.round(wfl / 35))));
-    setman(zone, "raumHoehe", zahl(geo.raumhoehe, 2.5));
+    setv(zone, "geschossHoehe", kw.geschosshoehe);
+    setauto(zone, "personen", String(kw.personen));
+    setman(zone, "raumHoehe", kw.raumhoehe);
     setman(zone, "flaeche", wfl);
-    setauto(zone, "V", wfl * zahl(geo.raumhoehe, 2.5));
+    setauto(zone, "V", wfl * kw.raumhoehe);
 
-    // ---- Wärmebrücken
-    const wbz = zahl(allg.wbz, 0.1);
+    // ---- Wärmebrücken (pauschal wie EVEBI-Standard)
+    const wbz = kw.wbz;
     if (find(eing, "wbv/delta_U_WB")) setv(eing, "wbv/delta_U_WB", wbz);
 
     // ---- Konstruktionen
@@ -481,8 +607,8 @@
     const erz = kids(need(eing, "hzErzListe"), "item");
     if (erz[0]) {
       setv(erz[0], "baujahr", bjHz);
-      if (zahl(hz.leistung) > 0) setv(erz[0], "Leistung", zahl(hz.leistung));
-      if (zahl(hz.anzahl) > 0 && find(erz[0], "anzahlGeraete")) setv(erz[0], "anzahlGeraete", String(Math.round(zahl(hz.anzahl))));
+      // Leistung bleibt aus der Vorlage, EVEBI rechnet die Heizlast selbst; Etagenheizung: eine Therme je Wohnung
+      if (find(erz[0], "anzahlGeraete")) setv(erz[0], "anzahlGeraete", String(hz.preset === "gas_bw_etage" ? kw.we : 1));
     }
     for (const e of erz.slice(1)) setv(e, "baujahr", bjHz);
     const hzItem = kids(need(eing, "hzListe"), "item")[0];
@@ -494,14 +620,14 @@
         setv(ue, "baujahr", bjUe);
         setv(ue, "bjRegelung", bjUe);
         setv(ue, "heizKoerperArt", hz.uebergabe || "HZK_HEIZKOERPER");
-        setv(ue, "hkTemp", hz.hkTemp || (hz.uebergabe === "HZK_FLAECHENHZ" ? "HKTEMP_35_28" : "HKTEMP_55_45"));
-        setv(ue, "hydrAbgeglichenArt", hz.hydr || "HYA_NONE");
+        setv(ue, "hkTemp", hz.uebergabe === "HZK_FLAECHENHZ" ? "HKTEMP_35_28" : "HKTEMP_55_45");
+        setv(ue, "hydrAbgeglichenArt", typeof hz.hydr === "string" ? hz.hydr : (hz.hydr ? "HYA_STATISCH_OHNE_GRUPPE" : "HYA_NONE"));
         if (hz.uebergabe === "HZK_FLAECHENHZ") setv(ue, "flHzSystem", "FHZ_SYS_FB_NASS");
         setv(ue, "name", hz.uebergabe === "HZK_FLAECHENHZ" ? "Fußbodenheizung" : "Heizkörper");
       }
     }
     for (const t of kids(need(eing, "twListe"), "item")) setv(t, "baujahr", baujahr);
-    for (const t of kids(need(eing, "twErzListe"), "item")) setv(t, "baujahr", String(zahl(hz.bjTww) || bjHz));
+    for (const t of kids(need(eing, "twErzListe"), "item")) setv(t, "baujahr", bjHz);
     for (const l of kids(need(eing, "luftListe"), "item")) {
       if (find(l, "kuehlWfl")) setv(l, "kuehlWfl", wfl);
       if (find(l, "bj_Anlage")) setv(l, "bj_Anlage", baujahr);
@@ -516,7 +642,8 @@
       ["baujahr", baujahr], ["baujahrHzErz", bjHz], ["ausstelldatum", datum]]) setv(eaEl, k, v);
     const ml = need(eaEl, "modernisierungenListe");
     leeren(ml);
-    for (const m of (ea.modernisierungen || [])) {
+    const liste = [...empfehlungen(p).filter(e => e.aktiv), ...(ea.eigene || []), ...(ea.modernisierungen || [])];
+    for (const m of liste) {
       if (!m.text) continue;
       const it = regen(importiere(doc, V.proto.mod));
       setv(it, "anlagenteil", m.anlagenteil || "");
@@ -567,5 +694,5 @@
     return { bytes: await zip(dateien), dateiname: basis + ".evex", warnungen };
   }
 
-  root.EvexGen = { erzeugeEvex, kennwerte, uWert, rLuft, BAUTEILARTEN };
+  root.EvexGen = { erzeugeEvex, kennwerte, auto, huelleSoll, empfehlungen, bundeslandAusPlz, uWert, rLuft, BAUTEILARTEN, RICHTUNG };
 })(typeof window !== "undefined" ? window : globalThis);

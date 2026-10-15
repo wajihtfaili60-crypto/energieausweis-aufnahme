@@ -1,7 +1,8 @@
 /* Offline-Betrieb: App-Dateien zwischenspeichern, online immer die neueste Fassung holen. */
-const CACHE = "hk-aufnahme-v1";
+const CACHE = "hk-aufnahme-v2";
 const DATEIEN = ["./", "index.html", "style.css", "app.js", "evex.js", "vorlage.js", "manifest.webmanifest",
-  "icon-192.png", "icon-512.png", "icon-maskable-512.png", "apple-touch-icon.png"];
+  "icon-192.png", "icon-512.png", "icon-maskable-512.png", "apple-touch-icon.png",
+  "fonts/fonts.css", "fonts/Barlow-400.woff2", "fonts/Barlow-500.woff2", "fonts/Barlow-600.woff2", "fonts/Barlow-700.woff2", "fonts/BarlowCondensed-600.woff2"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(DATEIEN)).then(() => self.skipWaiting()));

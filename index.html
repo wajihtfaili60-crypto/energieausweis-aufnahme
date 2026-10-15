@@ -5,23 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>HK Aufnahme</title>
   <meta name="description" content="Datenaufnahme für Energieausweise am Handy, Export als EVEBI-Projektdatei (.evex).">
-  <meta name="theme-color" content="#9cc31b">
+  <meta name="theme-color" content="#24481a">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="HK Aufnahme">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon-192.png" type="image/png">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="preload" href="fonts/Barlow-400.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/Barlow-600.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="leiste">
-    <button id="zurueck" class="knopf-icon" aria-label="Zurück" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 5l-7 7 7 7"/></svg></button>
+  <header class="kopf">
+    <span class="logo" id="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#1b2a07" stroke-width="2.4" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M6 10v10h12V10"/><path d="M9 15h6M9 18h4"/></svg></span>
+    <button id="zurueck" class="rund" aria-label="Zurück" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M15 5l-7 7 7 7"/></svg></button>
     <h1 id="titel">HK Aufnahme</h1>
-    <button id="einstellungen" class="knopf-icon" aria-label="Aussteller-Einstellungen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></button>
+    <button id="einstellungen" class="rund" aria-label="Aussteller-Einstellungen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></button>
   </header>
-  <main id="app" aria-live="polite"><p class="hinweis">Lädt …</p></main>
+  <main id="app"><p class="hinweis" style="padding-top:16px">Lädt …</p></main>
   <noscript><p style="padding:16px">Diese App braucht JavaScript.</p></noscript>
   <script src="vorlage.js"></script>
   <script src="evex.js"></script>
