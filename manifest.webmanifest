@@ -1,0 +1,17 @@
+{
+  "name": "HK Aufnahme – Energieausweis-Daten für EVEBI",
+  "short_name": "HK Aufnahme",
+  "description": "Datenaufnahme für Energieausweise am Handy, Export als EVEBI-Projektdatei (.evex).",
+  "lang": "de",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#e9ebe6",
+  "theme_color": "#9cc31b",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

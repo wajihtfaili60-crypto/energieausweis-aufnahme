@@ -1,0 +1,198 @@
+/* Layout: EVEBI-Arbeitsfläche aufs Handy übertragen – grüne Werkzeugleiste,
+   „Gebäudedaten“-Baum als Startliste, graue Abschnittsköpfe, Feldzeilen mit
+   Einheit und Badge (A = berechnet, Stift = Eingabe). */
+:root {
+  --leiste: #9cc31b;          /* EVEBI-Werkzeugleiste */
+  --leiste-text: #1d2a05;
+  --gruen: #6d9a0c;           /* „A“-Badge, Erfolg */
+  --stift: #2463b5;           /* manuelle Eingabe */
+  --kopf: #5b5f63;            /* Abschnittskopf wie „Allgemeine Daten zum Projekt“ */
+  --kopf-text: #ffffff;
+  --bg: #e9ebe6;
+  --flaeche: #ffffff;
+  --flaeche-2: #f4f5f2;
+  --linie: #cfd3c9;
+  --text: #1f2421;
+  --text-2: #5c645b;
+  --warn: #b7791f;
+  --fehler: #b3261e;
+  --klasse-h: #c0272d;
+  --fokus: #2463b5;
+  --schrift: "Segoe UI", system-ui, -apple-system, "Roboto", "Helvetica Neue", Arial, sans-serif;
+  --schrift-zahl: "Segoe UI", system-ui, -apple-system, "Roboto", Arial, sans-serif;
+  --r: 4px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --leiste: #7ea015; --leiste-text: #0f1603; --gruen: #9cc31b; --stift: #6ea8f0;
+    --kopf: #3a3e42; --kopf-text: #eef0ec; --bg: #161816; --flaeche: #1f2220; --flaeche-2: #262a27;
+    --linie: #3a403a; --text: #e8ebe6; --text-2: #a4aba3; --warn: #e0a84a; --fehler: #ff8a80;
+    --klasse-h: #e0484e; --fokus: #6ea8f0; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --leiste: #7ea015; --leiste-text: #0f1603; --gruen: #9cc31b; --stift: #6ea8f0;
+  --kopf: #3a3e42; --kopf-text: #eef0ec; --bg: #161816; --flaeche: #1f2220; --flaeche-2: #262a27;
+  --linie: #3a403a; --text: #e8ebe6; --text-2: #a4aba3; --warn: #e0a84a; --fehler: #ff8a80;
+  --klasse-h: #e0484e; --fokus: #6ea8f0; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font: 15px/1.4 var(--schrift); -webkit-text-size-adjust: 100%;
+}
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--fokus); outline-offset: 2px; }
+[hidden] { display: none !important; }
+
+/* ---------- Werkzeugleiste */
+.leiste {
+  position: sticky; top: 0; z-index: 10;
+  background: var(--leiste); color: var(--leiste-text);
+  padding: calc(env(safe-area-inset-top, 0px) + 8px) 12px 8px;
+  display: flex; align-items: center; gap: 10px;
+  border-bottom: 1px solid rgba(0,0,0,.18);
+}
+.leiste h1 { margin: 0; font-size: 16px; font-weight: 700; letter-spacing: .01em; flex: 1; min-width: 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.leiste small { display: block; font-weight: 500; font-size: 12px; opacity: .8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.leiste .knopf-icon { background: rgba(255,255,255,.35); border: 1px solid rgba(0,0,0,.15); color: var(--leiste-text); }
+
+main { max-width: 760px; margin: 0 auto; padding: 12px 12px calc(env(safe-area-inset-bottom, 0px) + 96px); display: grid; gap: 12px; }
+
+/* ---------- Abschnitt im EVEBI-Look */
+.panel { background: var(--flaeche); border: 1px solid var(--linie); border-radius: var(--r); overflow: hidden; }
+.panel > h2, .panel-kopf {
+  margin: 0; background: var(--kopf); color: var(--kopf-text); font-size: 13px; font-weight: 600;
+  padding: 7px 12px; text-align: center; letter-spacing: .02em;
+}
+.panel-kopf { display: flex; align-items: center; justify-content: space-between; text-align: left; gap: 8px; }
+.panel .inhalt { padding: 10px 12px; display: grid; gap: 8px; }
+.hinweis { font-size: 13px; color: var(--text-2); margin: 0; }
+.hinweis.warn { color: var(--warn); }
+
+/* Feldzeile: Beschriftung | Eingabe | Einheit | Badge */
+.feld { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr) 2.2em 22px; align-items: center; gap: 6px; }
+.feld > label, .feld > .lbl { font-size: 14px; color: var(--text); min-width: 0; }
+.feld .einheit { font-size: 13px; color: var(--text-2); }
+.feld.breit { grid-template-columns: minmax(0, 1fr); }
+.feld.breit > label { font-size: 13px; color: var(--text-2); }
+input[type=text], input[type=date], input[type=email], input[type=tel], select, textarea {
+  width: 100%; min-width: 0; background: var(--flaeche); border: 1px solid var(--linie); border-radius: 3px;
+  padding: 7px 8px; font-size: 15px;
+}
+input.zahl { text-align: right; font-variant-numeric: tabular-nums; font-family: var(--schrift-zahl); }
+input[readonly] { background: var(--flaeche-2); color: var(--text-2); }
+textarea { min-height: 60px; resize: vertical; }
+.badge { width: 20px; height: 20px; display: inline-grid; place-items: center; border-radius: 3px; font-size: 12px; font-weight: 700; }
+.badge.a { background: var(--gruen); color: #fff; }
+.badge.s { background: var(--stift); color: #fff; }
+.badge svg { width: 13px; height: 13px; }
+
+/* ---------- Baum „Gebäudedaten“ */
+.baum { list-style: none; margin: 0; padding: 4px 0; }
+.baum li a {
+  display: grid; grid-template-columns: 26px minmax(0, 1fr) auto 14px; align-items: center; gap: 10px;
+  padding: 11px 12px; color: var(--text); text-decoration: none; border-bottom: 1px solid var(--flaeche-2);
+}
+.baum li:last-child a { border-bottom: 0; }
+.baum li a:active { background: var(--flaeche-2); }
+.baum .ico { width: 26px; height: 26px; border-radius: 4px; display: grid; place-items: center; background: var(--flaeche-2); border: 1px solid var(--linie); }
+.baum .ico svg { width: 16px; height: 16px; }
+.baum .titel { font-weight: 600; }
+.baum .unter { display: block; font-size: 12px; color: var(--text-2); font-weight: 400; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chip { font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 999px; white-space: nowrap; }
+.chip.ok { background: color-mix(in srgb, var(--gruen) 18%, transparent); color: var(--gruen); }
+.chip.offen { background: color-mix(in srgb, var(--warn) 18%, transparent); color: var(--warn); }
+.pfeil { color: var(--text-2); }
+
+/* ---------- Kennwerte-Karte (rechte EVEBI-Spalte) */
+.kennkarte { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 1px; background: var(--linie); }
+.kennkarte div { background: var(--flaeche); padding: 8px 10px; }
+.kennkarte b { display: block; font-size: 20px; font-variant-numeric: tabular-nums; font-family: var(--schrift-zahl); }
+.kennkarte span { font-size: 12px; color: var(--text-2); }
+
+/* ---------- Listen */
+.liste { display: grid; gap: 0; }
+.zeile {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center;
+  padding: 10px 12px; border-bottom: 1px solid var(--flaeche-2); text-decoration: none; color: var(--text);
+}
+.zeile:last-child { border-bottom: 0; }
+.zeile .titel { display: block; font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
+.zeile .unter { display: block; font-size: 12px; color: var(--text-2); }
+.zeile .wert { font-variant-numeric: tabular-nums; font-size: 13px; color: var(--text-2); text-align: right; }
+
+/* ---------- Knöpfe */
+.knopf {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 9px 14px; border-radius: var(--r); border: 1px solid var(--linie);
+  background: var(--flaeche); color: var(--text); font-weight: 600; font-size: 14px; text-decoration: none;
+}
+.knopf.haupt { background: var(--leiste); color: var(--leiste-text); border-color: rgba(0,0,0,.2); }
+.knopf.gefahr { color: var(--fehler); }
+.knopf.klein { padding: 5px 9px; font-size: 13px; }
+.knopf-icon { width: 38px; height: 38px; border-radius: var(--r); display: grid; place-items: center; border: 1px solid var(--linie); background: var(--flaeche); color: var(--text); flex: none; }
+.knopf-icon svg, .knopf svg { width: 18px; height: 18px; }
+.reihe { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.reihe.ende { justify-content: flex-end; }
+
+/* Schnellvorlagen */
+.vorlagen { display: flex; flex-wrap: wrap; gap: 6px; }
+.vorlagen button { border: 1px dashed var(--linie); background: var(--flaeche-2); border-radius: 999px; padding: 5px 10px; font-size: 13px; }
+
+/* Schichttabelle */
+.schichten { display: grid; gap: 6px; }
+.schicht { display: grid; grid-template-columns: minmax(0, 1fr) 4.2em 4.6em 30px; gap: 6px; align-items: center; padding: 8px; border: 1px solid var(--linie); border-radius: var(--r); background: var(--flaeche-2); }
+.schicht .name { grid-column: 1 / -1; display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 6px; align-items: center; }
+.schicht .nr { font-size: 12px; color: var(--text-2); text-align: center; }
+.schicht .mini { font-size: 11px; color: var(--text-2); display: block; }
+.uwert { display: flex; justify-content: space-between; align-items: baseline; padding: 8px 10px; background: var(--flaeche-2); border-radius: var(--r); border: 1px solid var(--linie); }
+.uwert b { font-size: 18px; font-variant-numeric: tabular-nums; }
+
+/* Kompass für Ausrichtung */
+.kompass { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.kompass button { padding: 8px 0; border: 1px solid var(--linie); background: var(--flaeche); border-radius: var(--r); font-weight: 600; }
+.kompass button[aria-pressed="true"] { background: var(--stift); color: #fff; border-color: var(--stift); }
+
+/* Öffnungen */
+.oeffnung { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 3.4em 30px; gap: 6px; align-items: end; padding: 8px; border: 1px solid var(--linie); border-radius: var(--r); background: var(--flaeche-2); }
+.oeffnung .voll { grid-column: 1 / -1; }
+.oeffnung label { font-size: 11px; color: var(--text-2); display: block; }
+
+/* Auswahlkarten (Heizung) */
+.auswahl { display: grid; gap: 6px; }
+.auswahl label { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 8px; padding: 10px; border: 1px solid var(--linie); border-radius: var(--r); background: var(--flaeche); align-items: start; }
+.auswahl input { margin-top: 3px; }
+.auswahl label:has(input:checked) { border-color: var(--stift); box-shadow: inset 3px 0 0 var(--stift); }
+.auswahl small { display: block; color: var(--text-2); font-size: 12px; }
+
+/* Prüfliste */
+.pruef { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.pruef li { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 8px; font-size: 14px; }
+.pruef .p-ok { color: var(--gruen); font-weight: 700; }
+.pruef .p-warn { color: var(--warn); font-weight: 700; }
+
+/* Foto */
+.foto { width: 100%; max-height: 260px; object-fit: cover; border-radius: var(--r); border: 1px solid var(--linie); background: var(--flaeche-2); }
+
+/* Bestätigungsleiste */
+.bestaetigen { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px; border: 1px solid var(--fehler); border-radius: var(--r); background: color-mix(in srgb, var(--fehler) 8%, var(--flaeche)); }
+
+/* Toast */
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
+  background: var(--kopf); color: var(--kopf-text); padding: 10px 16px; border-radius: 999px; font-size: 14px; z-index: 50; max-width: calc(100% - 32px); }
+
+/* Untere Aktionsleiste im Projekt */
+.fuss { position: fixed; left: 0; right: 0; bottom: 0; z-index: 9; background: var(--flaeche); border-top: 1px solid var(--linie);
+  padding: 10px 12px calc(env(safe-area-inset-bottom, 0px) + 10px); display: flex; gap: 8px; justify-content: center; }
+.fuss .knopf { flex: 1; max-width: 360px; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .toast { animation: rein .18s ease-out; }
+  @keyframes rein { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translate(-50%, 0); } }
+}
